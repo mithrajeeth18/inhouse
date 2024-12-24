@@ -1,10 +1,5 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
 import AttendanceTable from './AttendanceTable'
-import GetReport from './GetReport'
-
+import UpdateAttendance from './UpdateAttendance';
 
 
 function App() {
@@ -103,7 +98,7 @@ function App() {
   {
     attendance: [
       {
-        date: '08/08/2024',
+        date: '12/24/2024',
         semId: 'SEM123',
         students: [
           { name: 'John Doe', prn: 'PRN12345', attendance: 1 },
@@ -131,7 +126,8 @@ function App() {
   return (
     <>
       <div>
-           <AttendanceTable data={data} />
+        {/* <AttendanceTable data={data} /> */}
+        <UpdateAttendance data={data}/>
         </div>
     </>
   )

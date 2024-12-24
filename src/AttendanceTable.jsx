@@ -12,6 +12,8 @@ const AttendanceTable = ({ data }) =>
 
 const exportToCSV = () => {
   const headers = ["Name", "PRN", ...dates, "Out of", "Student %"];
+  
+  // Prepare rows for student data
   const rows = students.map((student) => {
     const studentRow = [
       student.name,
@@ -20,25 +22,34 @@ const exportToCSV = () => {
         row.students.find((s) => s.prn === student.prn)?.attendance || 0
       ),
       `${student.cumulativeAttendance} / ${dates.length}`,
-      `${(
-        (student.cumulativeAttendance / dates.length) *
-        100
-      ).toFixed(2)}%`,
+      `${((student.cumulativeAttendance / dates.length) * 100).toFixed(2)}%`,
     ];
     return studentRow;
   });
 
-  const csvContent =
-    [headers, ...rows]
+  // Prepare Lecture % row
+  const lecturePercentageRow = [
+    "Lecture %",
+    "",
+    ...attendanceRows.map((row) => `${row.lecturePercentage}%`),
+    "",
+    ""
+  ];
+
+  // Combine headers, rows, and Lecture % row
+  const csvContent = 
+    [headers, ...rows, lecturePercentageRow]
       .map((row) => row.map((cell) => `"${cell}"`).join(","))
       .join("\n");
 
+  // Generate CSV file and trigger download
   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
   link.download = "Attendance.csv";
   link.click();
 };
+
 
   const calculateData = (data) => {
     const students = {}; // Store cumulative attendance for each student
