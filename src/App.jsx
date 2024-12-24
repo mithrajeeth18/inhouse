@@ -98,7 +98,7 @@ function App() {
   {
     attendance: [
       {
-        date: '12/24/2024',
+        date: '24/12/2024',
         semId: 'SEM123',
         students: [
           { name: 'John Doe', prn: 'PRN12345', attendance: 1 },
