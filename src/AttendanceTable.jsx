@@ -1,7 +1,73 @@
 import React from 'react';
+import ExcelJS from 'exceljs';
 
-const AttendanceTable = ({ data }) => {
-  // Calculate attendance, student %, and lecture % dynamically
+
+
+
+
+const AttendanceTable = ({ data }) =>
+{
+    
+
+
+const exportToCSV = () => {
+  const headers = ["Name", "PRN", ...dates, "Out of", "Student %"];
+  const rows = students.map((student) => {
+    const studentRow = [
+      student.name,
+      student.prn,
+      ...attendanceRows.map((row) =>
+        row.students.find((s) => s.prn === student.prn)?.attendance || 0
+      ),
+      `${student.cumulativeAttendance} / ${dates.length}`,
+      `${(
+        (student.cumulativeAttendance / dates.length) *
+        100
+      ).toFixed(2)}%`,
+    ];
+    return studentRow;
+  });
+
+  const csvContent =
+    [headers, ...rows]
+      .map((row) => row.map((cell) => `"${cell}"`).join(","))
+      .join("\n");
+
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "Attendance.csv";
+  link.click();
+};
+
+const exportToXLSX = () => {
+  const headers = ["Name", "PRN", ...dates, "Out of", "Student %"];
+  const rows = students.map((student) => [
+    student.name,
+    student.prn,
+    ...attendanceRows.map((row) =>
+      row.students.find((s) => s.prn === student.prn)?.attendance || 0
+    ),
+    `${student.cumulativeAttendance} / ${dates.length}`,
+    `${(
+      (student.cumulativeAttendance / dates.length) *
+      100
+    ).toFixed(2)}%`,
+  ]);
+
+  const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Attendance");
+
+  // Style the headers (optional)
+  worksheet["A1"].s = { fill: { fgColor: { rgb: "007BFF" } } };
+
+  XLSX.writeFile(workbook, "Attendance.xlsx");
+};
+
+
+
+
   const calculateData = (data) => {
     const students = {}; // Store cumulative attendance for each student
     const dates = [];
@@ -59,9 +125,7 @@ const AttendanceTable = ({ data }) => {
           fontFamily: 'Arial, sans-serif',
           fontSize: '14px',
           textAlign: 'center',
-        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-                  border: "111px"
-          
+          boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
         }}
       >
         <thead>
@@ -69,9 +133,13 @@ const AttendanceTable = ({ data }) => {
             <th style={{ padding: '10px' }}>Name</th>
             <th style={{ padding: '10px' }}>PRN</th>
             {dates.map((date, index) => (
-              <th key={index} style={{ padding: '10px' }}>{date}</th>
+              <th key={index} style={{ padding: '10px' }}>
+                {date}
+              </th>
             ))}
+            <th style={{ padding: '10px' }}>Out of</th>
             <th style={{ padding: '10px' }}>Student %</th>
+            
           </tr>
         </thead>
         <tbody>
@@ -83,24 +151,25 @@ const AttendanceTable = ({ data }) => {
             ).toFixed(2);
 
             return (
-              <tr key={student.prn} style={{  backgroundColor: '#F9F9F9',color:'black' }}>
+              <tr key={student.prn} style={{ backgroundColor: '#F9F9F9', color: 'black' }}>
                 <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>
                   {student.name}
                 </td>
                 <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>
                   {student.prn}
                 </td>
-                {/* {attendanceRows.map((row, index) => {
+                {attendanceRows.map((row, index) => {
                   const studentAttendance = row.students.find(
                     (s) => s.prn === student.prn
                   )?.attendance;
-                    const dailyAttendance = studentData?.dailyAttendance || 0;
+
                   const prevAttendance =
                     index > 0
                       ? attendanceRows[index - 1].students.find(
                           (s) => s.prn === student.prn
                         )?.attendance || 0
                       : 0;
+
                   return (
                     <td
                       key={index}
@@ -108,50 +177,26 @@ const AttendanceTable = ({ data }) => {
                         padding: '10px',
                         borderBottom: '1px solid #ddd',
                         backgroundColor:
-                          dailyAttendance === 0 && studentAttendance === prevAttendance
+                          studentAttendance === prevAttendance
                             ? '#F2DEDE'
                             : '#DFF0D8',
-                        color:
-                          dailyAttendance === 0 && studentAttendance === prevAttendance
-                            ? '#A94442'
-                            : '#3C763D',
+                        color: studentAttendance === prevAttendance ? '#A94442' : '#3C763D',
                       }}
                     >
                       {studentAttendance || 0}
                     </td>
                   );
-                })} */}
-                {attendanceRows.map((row, index) => {
-                const studentAttendance = row.students.find(
-                    (s) => s.prn === student.prn
-                )?.attendance;
-                
-                const prevAttendance =
-                    index > 0
-                    ? attendanceRows[index - 1].students.find(
-                        (s) => s.prn === student.prn
-                        )?.attendance || 0
-                    : 0;
-
-                return (
-                    <td
-                    key={index}
-                    style={{
-                        padding: '10px',
-                        borderBottom: '1px solid #ddd',
-                        backgroundColor:
-                        studentAttendance === prevAttendance
-                            ? '#F2DEDE'
-                            : '#DFF0D8',
-                        color: studentAttendance === prevAttendance ? '#A94442' : '#3C763D',
-                    }}
-                    >
-                    {studentAttendance || 0}
-                    </td>
-                );
                 })}
-
+               
                 <td
+                  style={{
+                    padding: '10px',
+                    borderBottom: '1px solid #ddd',
+                  }}
+                >
+                  {student.cumulativeAttendance} / {dates.length}
+                    </td>
+                     <td
                   style={{
                     padding: '10px',
                     borderBottom: '1px solid #ddd',
@@ -171,8 +216,8 @@ const AttendanceTable = ({ data }) => {
               style={{
                 padding: '10px',
                 borderBottom: '1px solid #ddd',
-                  textAlign: 'right',
-                color:'black'
+                textAlign: 'right',
+                color: 'black',
               }}
             >
               Lecture %
@@ -192,9 +237,41 @@ const AttendanceTable = ({ data }) => {
               </td>
             ))}
             <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}></td>
+            <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}></td>
           </tr>
         </tbody>
-      </table>
+          </table>
+          <div style={{ marginTop: '20px', textAlign: 'center' }}>
+  <button
+    onClick={exportToCSV}
+    style={{
+      padding: '10px 20px',
+      margin: '10px',
+      backgroundColor: '#007BFF',
+      color: '#FFF',
+      border: 'none',
+      borderRadius: '5px',
+      cursor: 'pointer',
+    }}
+  >
+    Export to CSV
+  </button>
+  <button
+    onClick={exportToXLSX}
+    style={{
+      padding: '10px 20px',
+      margin: '10px',
+      backgroundColor: '#28A745',
+      color: '#FFF',
+      border: 'none',
+      borderRadius: '5px',
+      cursor: 'pointer',
+    }}
+  >
+    Export to XLSX
+  </button>
+</div>
+
     </div>
   );
 };

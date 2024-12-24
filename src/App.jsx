@@ -3,6 +3,7 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 import AttendanceTable from './AttendanceTable'
+import GetReport from './GetReport'
 
 
 
@@ -85,7 +86,47 @@ function App() {
         ],
       },
     ],
-  },
+    },
+  {
+    attendance: [
+      {
+        date: '08/08/2024',
+        semId: 'SEM123',
+        students: [
+          { name: 'John Doe', prn: 'PRN12345', attendance: 1 },
+          { name: 'Jane Smith', prn: 'PRN67890', attendance: 1 },
+          { name: 'Mithra', prn: 'PRN12340', attendance: 0 },
+        ],
+      },
+    ],
+    },
+  {
+    attendance: [
+      {
+        date: '08/08/2024',
+        semId: 'SEM123',
+        students: [
+          { name: 'John Doe', prn: 'PRN12345', attendance: 1 },
+          { name: 'Jane Smith', prn: 'PRN67890', attendance: 1 },
+          { name: 'Mithra', prn: 'PRN12340', attendance: 0 },
+        ],
+      },
+    ],
+    },
+  {
+    attendance: [
+      {
+        date: '08/08/2024',
+        semId: 'SEM123',
+        students: [
+          { name: 'John Doe', prn: 'PRN12345', attendance: 1 },
+          { name: 'Jane Smith', prn: 'PRN67890', attendance: 1 },
+          { name: 'Mithra', prn: 'PRN12340', attendance: 0 },
+        ],
+      },
+    ],
+    },
+  
 ];
   return (
     <>
