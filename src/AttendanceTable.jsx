@@ -228,20 +228,7 @@ const exportToCSV = () => {
   >
     Export to CSV
   </button>
-  <button
-    onClick={exportToXLSX}
-    style={{
-      padding: '10px 20px',
-      margin: '10px',
-      backgroundColor: '#28A745',
-      color: '#FFF',
-      border: 'none',
-      borderRadius: '5px',
-      cursor: 'pointer',
-    }}
-  >
-    Export to XLSX
-  </button>
+  
 </div>
 
     </div>
