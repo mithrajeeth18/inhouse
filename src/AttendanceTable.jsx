@@ -1,5 +1,5 @@
 import React from 'react';
-import ExcelJS from 'exceljs';
+
 
 
 
@@ -39,34 +39,6 @@ const exportToCSV = () => {
   link.download = "Attendance.csv";
   link.click();
 };
-
-const exportToXLSX = () => {
-  const headers = ["Name", "PRN", ...dates, "Out of", "Student %"];
-  const rows = students.map((student) => [
-    student.name,
-    student.prn,
-    ...attendanceRows.map((row) =>
-      row.students.find((s) => s.prn === student.prn)?.attendance || 0
-    ),
-    `${student.cumulativeAttendance} / ${dates.length}`,
-    `${(
-      (student.cumulativeAttendance / dates.length) *
-      100
-    ).toFixed(2)}%`,
-  ]);
-
-  const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Attendance");
-
-  // Style the headers (optional)
-  worksheet["A1"].s = { fill: { fgColor: { rgb: "007BFF" } } };
-
-  XLSX.writeFile(workbook, "Attendance.xlsx");
-};
-
-
-
 
   const calculateData = (data) => {
     const students = {}; // Store cumulative attendance for each student
