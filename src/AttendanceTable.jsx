@@ -1,6 +1,11 @@
 import React from 'react';
 
-const AttendanceTable = ({ data }) => {
+const AttendanceTable = ({ data }) =>
+{
+    if (!data || !data.attendance || data.attendance.length === 0) {
+    // If data is empty or invalid, render an empty div
+    return <div></div>;
+  }
   const exportToCSV = () => {
     const headers = ["Name", "PRN", ...dates, "Out of", "Student %"];
 
@@ -88,7 +93,8 @@ const AttendanceTable = ({ data }) => {
   // Process the data
   const { students, attendanceRows, dates } = calculateData(data);
 
-  return (
+    return (
+      
     <div style={{ overflowX: 'auto', padding: '20px' }}>
       <table
         style={{

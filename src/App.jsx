@@ -1,6 +1,7 @@
 import AttendanceTable from './AttendanceTable'
 import UpdateAttendance from './UpdateAttendance';
-import DropDown from './DynamicDropdowns';
+import FacultyPage from './Facultypage';
+
 
 function App()
 {
@@ -236,7 +237,8 @@ function App()
     <>
       <div>
         {/* <AttendanceTable data={data1} /> */}
-        <DropDown data={data2}/>
+        {/* <DropDown data={data2}/> */}
+        <FacultyPage data1={data2} data2={data1}/>
       </div>
     </>
   )

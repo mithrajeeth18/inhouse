@@ -1,0 +1,68 @@
+/* FacultyPage.css */
+
+/* General Styles */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+/* Navbar Styling */
+.navbar {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.navbar ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 30px;
+}
+
+.navbar li {
+    display: inline;
+}
+
+.navbar a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 5px 10px;
+    transition: background-color 0.2s ease;
+}
+
+.navbar a:hover {
+    background-color: #0056b3;
+    border-radius: 5px;
+}
+
+.navbar .active a {
+    background-color: white;
+    color: #007bff;
+    border-radius: 5px;
+}
+
+/* Content Styling */
+.content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    margin: 40px 20px;
+}
+
+.component-container {
+    width: 80%;
+    max-width: 600px;
+    background-color: #f9f9f9;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
