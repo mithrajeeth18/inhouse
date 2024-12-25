@@ -1,10 +1,89 @@
 import AttendanceTable from './AttendanceTable'
 import UpdateAttendance from './UpdateAttendance';
-
+import DropDown from './DropDown';
 
 function App()
 {
   
+
+  const data2 = {
+  "semesters": [
+    "7",
+    "6",
+    "8",
+    "5"
+  ],
+  "branches": {
+    "5": [
+      "CS"
+    ],
+    "6": [
+      "CS"
+    ],
+    "7": [
+      "CS"
+    ],
+    "8": [
+      "CS"
+    ]
+  },
+  "divisions": {
+    "5": {
+      "CS": [
+        "A"
+      ]
+    },
+    "6": {
+      "CS": [
+        "B"
+      ]
+    },
+    "7": {
+      "CS": [
+        "A"
+      ]
+    },
+    "8": {
+      "CS": [
+        "B"
+      ]
+    }
+  },
+  "batches": {
+    "5": {
+      "CS": {
+        "A": [
+          "01",
+          "ALL"
+        ]
+      }
+    },
+    "6": {
+      "CS": {
+        "B": [
+          "02",
+          "ALL"
+        ]
+      }
+    },
+    "7": {
+      "CS": {
+        "A": [
+          "01",
+          "ALL"
+        ]
+      }
+    },
+    "8": {
+      "CS": {
+        "B": [
+          "02",
+          "ALL"
+        ]
+      }
+    }
+  }
+}
   const data1 = {
 
     "attendance": [
@@ -157,7 +236,7 @@ function App()
     <>
       <div>
         <AttendanceTable data={data1} />
-        
+        {/* <DropDown data={data2}/> */}
       </div>
     </>
   )
