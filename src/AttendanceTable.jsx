@@ -1,64 +1,53 @@
 import React from 'react';
 
+const AttendanceTable = ({ data }) => {
+  const exportToCSV = () => {
+    const headers = ["Name", "PRN", ...dates, "Out of", "Student %"];
 
+    // Prepare rows for student data
+    const rows = students.map((student) => {
+      const studentRow = [
+        student.name,
+        student.prn,
+        ...attendanceRows.map((row) =>
+          row.students.find((s) => s.prn === student.prn)?.attendance || 0
+        ),
+        `${student.cumulativeAttendance} / ${dates.length}`,
+        `${((student.cumulativeAttendance / dates.length) * 100).toFixed(2)}%`,
+      ];
+      return studentRow;
+    });
 
-
-
-
-const AttendanceTable = ({ data }) =>
-{
-    
-
-
-const exportToCSV = () => {
-  const headers = ["Name", "PRN", ...dates, "Out of", "Student %"];
-  
-  // Prepare rows for student data
-  const rows = students.map((student) => {
-    const studentRow = [
-      student.name,
-      student.prn,
-      ...attendanceRows.map((row) =>
-        row.students.find((s) => s.prn === student.prn)?.attendance || 0
-      ),
-      `${student.cumulativeAttendance} / ${dates.length}`,
-      `${((student.cumulativeAttendance / dates.length) * 100).toFixed(2)}%`,
+    // Prepare Lecture % row
+    const lecturePercentageRow = [
+      "Lecture %",
+      "",
+      ...attendanceRows.map((row) => `${row.lecturePercentage}%`),
+      "",
+      "",
     ];
-    return studentRow;
-  });
 
-  // Prepare Lecture % row
-  const lecturePercentageRow = [
-    "Lecture %",
-    "",
-    ...attendanceRows.map((row) => `${row.lecturePercentage}%`),
-    "",
-    ""
-  ];
-
-  // Combine headers, rows, and Lecture % row
-  const csvContent = 
-    [headers, ...rows, lecturePercentageRow]
+    // Combine headers, rows, and Lecture % row
+    const csvContent = [headers, ...rows, lecturePercentageRow]
       .map((row) => row.map((cell) => `"${cell}"`).join(","))
       .join("\n");
 
-  // Generate CSV file and trigger download
-  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = "Attendance.csv";
-  link.click();
-};
-
+    // Generate CSV file and trigger download
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "Attendance.csv";
+    link.click();
+  };
 
   const calculateData = (data) => {
     const students = {}; // Store cumulative attendance for each student
     const dates = [];
     const attendanceRows = [];
-    const totalStudents = data[0]?.attendance[0]?.students.length || 0;
+    const totalStudents = data.attendance[0]?.students.length || 0;
 
     // Initialize student data with names, PRNs, and starting attendance as 0
-    data[0]?.attendance[0]?.students.forEach((student) => {
+    data.attendance[0]?.students.forEach((student) => {
       students[student.prn] = {
         name: student.name,
         prn: student.prn,
@@ -67,9 +56,9 @@ const exportToCSV = () => {
     });
 
     // Iterate through attendance records
-    data.forEach((record) => {
-      const date = record.attendance[0]?.date;
-      const studentData = record.attendance[0]?.students;
+    data.attendance.forEach((record) => {
+      const date = new Date(record.date).toLocaleDateString(); // Format date
+      const studentData = record.students;
       if (date) dates.push(date);
 
       studentData.forEach((student) => {
@@ -122,7 +111,6 @@ const exportToCSV = () => {
             ))}
             <th style={{ padding: '10px' }}>Out of</th>
             <th style={{ padding: '10px' }}>Student %</th>
-            
           </tr>
         </thead>
         <tbody>
@@ -146,13 +134,6 @@ const exportToCSV = () => {
                     (s) => s.prn === student.prn
                   )?.attendance;
 
-                  const prevAttendance =
-                    index > 0
-                      ? attendanceRows[index - 1].students.find(
-                          (s) => s.prn === student.prn
-                        )?.attendance || 0
-                      : 0;
-
                   return (
                     <td
                       key={index}
@@ -160,17 +141,14 @@ const exportToCSV = () => {
                         padding: '10px',
                         borderBottom: '1px solid #ddd',
                         backgroundColor:
-                          studentAttendance === prevAttendance
-                            ? '#F2DEDE'
-                            : '#DFF0D8',
-                        color: studentAttendance === prevAttendance ? '#A94442' : '#3C763D',
+                          studentAttendance > 0 ? '#DFF0D8' : '#F2DEDE',
+                        color: studentAttendance > 0 ? '#3C763D' : '#A94442',
                       }}
                     >
                       {studentAttendance || 0}
                     </td>
                   );
                 })}
-               
                 <td
                   style={{
                     padding: '10px',
@@ -178,8 +156,8 @@ const exportToCSV = () => {
                   }}
                 >
                   {student.cumulativeAttendance} / {dates.length}
-                    </td>
-                     <td
+                </td>
+                <td
                   style={{
                     padding: '10px',
                     borderBottom: '1px solid #ddd',
@@ -223,25 +201,23 @@ const exportToCSV = () => {
             <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}></td>
           </tr>
         </tbody>
-          </table>
-          <div style={{ marginTop: '20px', textAlign: 'center' }}>
-  <button
-    onClick={exportToCSV}
-    style={{
-      padding: '10px 20px',
-      margin: '10px',
-      backgroundColor: '#007BFF',
-      color: '#FFF',
-      border: 'none',
-      borderRadius: '5px',
-      cursor: 'pointer',
-    }}
-  >
-    Export to CSV
-  </button>
-  
-</div>
-
+      </table>
+      <div style={{ marginTop: '20px', textAlign: 'center' }}>
+        <button
+          onClick={exportToCSV}
+          style={{
+            padding: '10px 20px',
+            margin: '10px',
+            backgroundColor: '#007BFF',
+            color: '#FFF',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: 'pointer',
+          }}
+        >
+          Export to CSV
+        </button>
+      </div>
     </div>
   );
 };
