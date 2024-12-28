@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import fetchAttendanceData from "./api/fetchAttendanceData";
+
 const AttendanceTable = ({data}) => {
   // const [data, setData] = useState(null);
 
@@ -33,7 +34,6 @@ const AttendanceTable = ({data}) => {
   // }, []);
 
   if (!data || !data.attendance || data.attendance.length === 0) {
-    // If data is empty or invalid, render an empty div
     return <div>No data available</div>;
   }
 
@@ -41,8 +41,6 @@ const AttendanceTable = ({data}) => {
     const { students, attendanceRows, dates } = calculateData(data);
 
     const headers = ["Name", "PRN", ...dates, "Out of", "Student %"];
-
-    // Prepare rows for student data
     const rows = students.map((student) => {
       const studentRow = [
         student.name,
@@ -56,7 +54,6 @@ const AttendanceTable = ({data}) => {
       return studentRow;
     });
 
-    // Prepare Lecture % row
     const lecturePercentageRow = [
       "Lecture %",
       "",
@@ -65,12 +62,10 @@ const AttendanceTable = ({data}) => {
       "",
     ];
 
-    // Combine headers, rows, and Lecture % row
     const csvContent = [headers, ...rows, lecturePercentageRow]
       .map((row) => row.map((cell) => `"${cell}"`).join(","))
       .join("\n");
 
-    // Generate CSV file and trigger download
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
@@ -79,12 +74,11 @@ const AttendanceTable = ({data}) => {
   };
 
   const calculateData = (data) => {
-    const students = {}; // Store cumulative attendance for each student
+    const students = {};
     const dates = [];
     const attendanceRows = [];
     const totalStudents = data.attendance[0]?.students.length || 0;
 
-    // Initialize student data with names, PRNs, and starting attendance as 0
     data.attendance[0]?.students.forEach((student) => {
       students[student.prn] = {
         name: student.name,
@@ -93,18 +87,15 @@ const AttendanceTable = ({data}) => {
       };
     });
 
-    // Iterate through attendance records
     data.attendance.forEach((record) => {
-      const date = new Date(record.date).toLocaleDateString(); // Format date
+      const date = new Date(record.date).toLocaleDateString();
       const studentData = record.students;
       if (date) dates.push(date);
 
       studentData.forEach((student) => {
-        // Add attendance to cumulative value or keep previous value if absent
         students[student.prn].cumulativeAttendance += student.attendance;
       });
 
-      // Calculate lecture percentage for the current date
       const presentCount = studentData.filter(
         (student) => student.attendance === 1
       ).length;
@@ -116,7 +107,7 @@ const AttendanceTable = ({data}) => {
         date,
         students: studentData.map((s) => ({
           prn: s.prn,
-          attendance: students[s.prn].cumulativeAttendance,
+          attendance: s.attendance, // Keep specific daily attendance
         })),
         lecturePercentage,
       });
@@ -125,11 +116,11 @@ const AttendanceTable = ({data}) => {
     return { students: Object.values(students), attendanceRows, dates };
   };
 
-  // Process the data
   const { students, attendanceRows, dates } = calculateData(data);
 
   return (
     <div style={{ overflowX: "auto", padding: "20px" }}>
+      
       <table
         style={{
           borderCollapse: "collapse",
@@ -180,7 +171,8 @@ const AttendanceTable = ({data}) => {
                         padding: "10px",
                         borderBottom: "1px solid #ddd",
                         backgroundColor:
-                          studentAttendance > 0 ? "#DFF0D8" : "#F2DEDE",
+                          studentAttendance === 1 ? "#DFF0D8" : "#F2DEDE",
+                        color: studentAttendance === 1 ? "#3C763D" : "#A94442",
                       }}
                     >
                       {studentAttendance || 0}
@@ -195,6 +187,7 @@ const AttendanceTable = ({data}) => {
                     padding: "10px",
                     borderBottom: "1px solid #ddd",
                     fontWeight: "bold",
+                    color: studentPercentage >= 75 ? "#3C763D" : "#A94442",
                   }}
                 >
                   {studentPercentage}%
@@ -207,7 +200,14 @@ const AttendanceTable = ({data}) => {
               Lecture %
             </td>
             {attendanceRows.map((row, index) => (
-              <td key={index} style={{ padding: "10px" }}>
+              <td
+                key={index}
+                style={{
+                  padding: "10px",
+                  backgroundColor: "#FFF3CD",
+                  color: "#856404",
+                }}
+              >
                 {row.lecturePercentage}%
               </td>
             ))}

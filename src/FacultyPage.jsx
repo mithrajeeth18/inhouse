@@ -11,7 +11,12 @@ const FacultyPage = () => {
   const [attendance, setAttendance] = useState(null);
  
   const [criteria, setCriteria] = useState(null);
-   
+   const [selectedValues, setSelectedValues] = useState({});
+
+  const handleSelectionChange = (values) => {
+    console.log("Selected Values:", values);
+    setSelectedValues(values);
+  };
   // Fetch attendance data
   const fetchData = async () => {
       try {
@@ -23,11 +28,11 @@ const FacultyPage = () => {
 
         // Replace `fetchAttendanceData` with the actual API call or function
         const response = await fetchAttendanceData(
-          semester,
-          subjectId,
-          branch,
-          division,
-          batch
+          selectedValues.semester,
+          "CS501",
+          selectedValues.branch,
+          selectedValues.division,
+          selectedValues.batch
         );
 
         console.log("Attendance Data:", response);
@@ -55,6 +60,8 @@ const FacultyPage = () => {
     fetchCriteria();
   }, []);
 
+  
+
   // Handle rendering based on loading/error state
   
   return (
@@ -73,7 +80,7 @@ const FacultyPage = () => {
         <div className="component-container">
           {/* Render dropdowns only if criteria data exists */}
           {criteria ? (
-            <DynamicDropdowns data={criteria} />
+            <DynamicDropdowns data={criteria} onSelectionChange={handleSelectionChange} />
           ) : (
             <div>No criteria data available</div>
           )}

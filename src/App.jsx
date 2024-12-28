@@ -1,90 +1,35 @@
 import AttendanceTable from './AttendanceTable'
+import DynamicDropdowns from './dummydropdown';
 import UpdateAttendance from './UpdateAttendance';
 import FacultyPage from './Facultypage';
 import fetchAttendanceData from './api/fetchAttendanceData';
+import { useState } from 'react';
 
+//import AttendanceTable from './dummytabel' ;
 function App()
 {
   
+ const [selectedValues, setSelectedValues] = useState({});
 
+  const handleSelectionChange = (values) => {
+    setSelectedValues(values);
+  };
   const data2 = {
-  "semesters": [
-    "7",
-    "6",
-    "8",
-    "5"
-  ],
-  "branches": {
-    "5": [
-      "CS"
-    ],
-    "6": [
-      "CS"
-    ],
-    "7": [
-      "CS"
-    ],
-    "8": [
-      "CS"
-    ]
-  },
+  "semesters": ["5", "6", "7", "8"],
   "divisions": {
-    "5": {
-      "CS": [
-        "A"
-      ]
-    },
-    "6": {
-      "CS": [
-        "B"
-      ]
-    },
-    "7": {
-      "CS": [
-        "A"
-      ]
-    },
-    "8": {
-      "CS": [
-        "B"
-      ]
-    }
+    "5": ["A", "B"],
+    "6": ["A", "B"],
+    "7": ["A"],
+    "8": ["B"]
   },
   "batches": {
-    "5": {
-      "CS": {
-        "A": [
-          "01",
-          "ALL"
-        ]
-      }
-    },
-    "6": {
-      "CS": {
-        "B": [
-          "02",
-          "ALL"
-        ]
-      }
-    },
-    "7": {
-      "CS": {
-        "A": [
-          "01",
-          "ALL"
-        ]
-      }
-    },
-    "8": {
-      "CS": {
-        "B": [
-          "02",
-          "ALL"
-        ]
-      }
-    }
+    "5": {"A": ["01", "02"], "B": ["03", "ALL"]},
+    "6": {"A": ["01"], "B": ["ALL"]},
+    "7": {"A": ["ALL"]},
+    "8": {"B": ["02", "ALL"]}
   }
 }
+
   const data1 = {
 
     "attendance": [
@@ -236,9 +181,12 @@ function App()
   return (
     <>
       <div>
-        {/* <AttendanceTable  /> */}
+        {/* <AttendanceTable data={data}  /> */}
         {/* <DropDown data={data2}/> */}
-        <FacultyPage />
+        
+        {/* <FacultyPage /> */}
+        {/* <UpdateAttendance data={data}/> */}
+        <DynamicDropdowns data={data2} onSelectionChange={handleSelectionChange}/>
       </div>
     </>
   )
