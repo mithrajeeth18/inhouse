@@ -201,12 +201,12 @@ function App() {
         {/* <AttendanceTable data={data}  /> */}
         {/* <DropDown data={data2}/> */}
 
-        {/* <FacultyPage /> */}
+        <FacultyPage />
         {/* <UpdateAttendance data={data}/> */}
-        <DynamicDropdowns
+        {/* <DynamicDropdowns
           data={data3}
           onSelectionChange={handleSelectionChange}
-        />
+        /> */}
       </div>
     </>
   );
