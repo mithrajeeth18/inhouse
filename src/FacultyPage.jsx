@@ -5,24 +5,37 @@ import AttendanceTable from "./AttendanceTable";
 import DynamicDropdowns from "./DynamicDropdowns";
 import { getAttendanceData } from "./api/attendanceData";
 import getCriteria from "./api/crieteria";
-
+import axios from "axios";
+import fetchAttendanceData from "./api/fetchAttendanceData";
 const FacultyPage = () => {
-  const [attendance, setAttendance] = useState([]);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [attendance, setAttendance] = useState(null);
+ 
   const [criteria, setCriteria] = useState(null);
-
+   
   // Fetch attendance data
   const fetchData = async () => {
-    try {
-      const data = await getAttendanceData("5", "CS01", "CS", "A", "01");
-      setAttendance(data); // Save the attendance data
-      console.log("Attendance Data:", data);
-    } catch (err) {
-      setError("Failed to fetch attendance data.");
-      console.error(err);
-    }
-  };
+      try {
+        const semester = 5;
+        const subjectId = "CS501";
+        const branch = "CS";
+        const division = "A";
+        const batch = "01";
+
+        // Replace `fetchAttendanceData` with the actual API call or function
+        const response = await fetchAttendanceData(
+          semester,
+          subjectId,
+          branch,
+          division,
+          batch
+        );
+
+        console.log("Attendance Data:", response);
+        setAttendance(response);
+      } catch (error) {
+        console.error("Error fetching attendance data:", error);
+      }
+    };
 
   // Fetch criteria data on component mount
   useEffect(() => {
@@ -30,7 +43,7 @@ const FacultyPage = () => {
       try {
         const data = await getCriteria();
         setCriteria(data); // Set criteria data in state
-        console.log("Criteria Data:", data);
+        // console.log("Criteria Data:", data);
       } catch (err) {
         setError("Failed to fetch criteria data.");
         console.error(err);
@@ -43,14 +56,7 @@ const FacultyPage = () => {
   }, []);
 
   // Handle rendering based on loading/error state
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
-
+  
   return (
     <div className="faculty-page">
       {/* Navbar */}
@@ -81,7 +87,7 @@ const FacultyPage = () => {
           </button>
 
           {/* Render attendance table only if attendance data exists */}
-          {attendance.length > 0 ? (
+          {attendance?  (
             <AttendanceTable data={attendance} />
           ) : (
             <div>No attendance data available</div>

@@ -28,5 +28,5 @@ const getCriteria = async () => {
     throw error;
   }
 };
-
+getCriteria();
 export default getCriteria;

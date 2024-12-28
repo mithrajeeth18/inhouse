@@ -1,7 +1,7 @@
 import AttendanceTable from './AttendanceTable'
 import UpdateAttendance from './UpdateAttendance';
 import FacultyPage from './Facultypage';
-
+import fetchAttendanceData from './api/fetchAttendanceData';
 
 function App()
 {
@@ -236,9 +236,9 @@ function App()
   return (
     <>
       <div>
-        {/* <AttendanceTable data={data1} /> */}
+        {/* <AttendanceTable  /> */}
         {/* <DropDown data={data2}/> */}
-        <FacultyPage data1={data2} data2={data1}/>
+        <FacultyPage />
       </div>
     </>
   )
