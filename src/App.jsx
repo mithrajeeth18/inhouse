@@ -1,6 +1,6 @@
-import AttendanceTable from "./AttendanceTable";
+import UpdateAttendance from "./dummyupdate";
 import DynamicDropdowns from "./DynamicDropdowns";
-import UpdateAttendance from "./UpdateAttendance";
+// import UpdateAttendance from "./dummyAttendance";
 import FacultyPage from "./Facultypage";
 import fetchAttendanceData from "./api/fetchAttendanceData";
 import { useState } from "react";
@@ -200,16 +200,17 @@ function App() {
   return (
     <>
       <div>
-        {/* <AttendanceTable data={data}  /> */}
+        {/* <AttendanceTable data={data1}  /> */}
         {/* <DynamicDropdowns data={data3} onSelectionChange={handleSelectionChange}/> */}
 
-        <FacultyPage />
+        {/* <FacultyPage /> */}
         {/* <UpdateAttendance data={data}/> */}
         {/* <DynamicDropdowns
           data={data2}
           onSelectionChange={handleSelectionChange}
         /> */}
-        {/* <UpdateAttendance data={data1}/> */}
+        <UpdateAttendance data={data}/>
+
       </div>
     </>
   );
