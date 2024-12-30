@@ -1,151 +1,249 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import DropdownPage from './components/DropdownPage';
-import Navbar from './components/Navbar';
+import React from 'react';
 
-const AttendancePage = () => {
-  const [criteria, setCriteria] = useState({
-    semesters: [],
-    branches: {},
-    divisions: {},
-    batches: {},
+
+
+
+
+
+const AttendanceTable = ({ data }) =>
+{
+    
+
+
+const exportToCSV = () => {
+  const headers = ["Name", "PRN", ...dates, "Out of", "Student %"];
+  
+  // Prepare rows for student data
+  const rows = students.map((student) => {
+    const studentRow = [
+      student.name,
+      student.prn,
+      ...attendanceRows.map((row) =>
+        row.students.find((s) => s.prn === student.prn)?.attendance || 0
+      ),
+      `${student.cumulativeAttendance} / ${dates.length}`,
+      `${((student.cumulativeAttendance / dates.length) * 100).toFixed(2)}%`,
+    ];
+    return studentRow;
   });
-  const [selected, setSelected] = useState({
-    semester: '',
-    branch: '',
-    division: '',
-    batch: '',
-  });
-  const [attendanceData, setAttendanceData] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
-  // Fetch criteria for dropdowns
-  useEffect(() => {
-    const fetchCriteria = async () => {
-      try {
-        const response = await axios.get(
-          'https://attendance-backend-gold.vercel.app/principal/getCriteria'
-        );
-        setCriteria(response.data);
-      } catch (err) {
-        console.error('Error fetching criteria:', err);
-        setError('Failed to fetch criteria.');
-      }
-    };
+  // Prepare Lecture % row
+  const lecturePercentageRow = [
+    "Lecture %",
+    "",
+    ...attendanceRows.map((row) => `${row.lecturePercentage}%`),
+    "",
+    ""
+  ];
 
-    fetchCriteria();
-  }, []);
+  // Combine headers, rows, and Lecture % row
+  const csvContent = 
+    [headers, ...rows, lecturePercentageRow]
+      .map((row) => row.map((cell) => `"${cell}"`).join(","))
+      .join("\n");
 
-  // Handle dropdown change
-  const handleDropdownChange = (updatedValue) => {
-    setSelected((prev) => ({ ...prev, ...updatedValue }));
+  // Generate CSV file and trigger download
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "Attendance.csv";
+  link.click();
+};
+
+
+  const calculateData = (data) => {
+    const students = {}; // Store cumulative attendance for each student
+    const dates = [];
+    const attendanceRows = [];
+    const totalStudents = data[0]?.attendance[0]?.students.length || 0;
+
+    // Initialize student data with names, PRNs, and starting attendance as 0
+    data[0]?.attendance[0]?.students.forEach((student) => {
+      students[student.prn] = {
+        name: student.name,
+        prn: student.prn,
+        cumulativeAttendance: 0,
+      };
+    });
+
+    // Iterate through attendance records
+    data.forEach((record) => {
+      const date = record.attendance[0]?.date;
+      const studentData = record.attendance[0]?.students;
+      if (date) dates.push(date);
+
+      studentData.forEach((student) => {
+        // Add attendance to cumulative value or keep previous value if absent
+        students[student.prn].cumulativeAttendance += student.attendance;
+      });
+
+      // Calculate lecture percentage for the current date
+      const presentCount = studentData.filter(
+        (student) => student.attendance === 1
+      ).length;
+      const lecturePercentage = ((presentCount / totalStudents) * 100).toFixed(2);
+
+      attendanceRows.push({
+        date,
+        students: studentData.map((s) => ({
+          prn: s.prn,
+          attendance: students[s.prn].cumulativeAttendance,
+        })),
+        lecturePercentage,
+      });
+    });
+
+    return { students: Object.values(students), attendanceRows, dates };
   };
-  
 
-  // Fetch attendance data
-  const fetchAttendanceData = async () => {
-    setLoading(true);
-    setError(null);
-  
-    try {
-      console.log('Selected:', selected);
-      const { semester, branch, division, batch } = selected;
-      
-      console.log('Sending request with:', { semester, branch, division, batch });
-  
-      const response = await axios.get(
-        'https://attendance-backend-gold.vercel.app/principal/fetchAttendanceData',
-        { params: { semester, branch, division, batch } }
-      );
-      console.log('Response:', response);
-      setAttendanceData(response.data);
-    } catch (err) {
-      console.error('Error fetching attendance data:', err.response || err);
-      setError(err.response?.data?.message || 'Failed to fetch attendance data. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-  
+  // Process the data
+  const { students, attendanceRows, dates } = calculateData(data);
 
   return (
-    <div>
-      <Navbar />
-      <DropdownPage
-        criteria={criteria}
-        selected={selected}
-        onDropdownChange={handleDropdownChange}
-        onFetchData={fetchAttendanceData}
-        isLoading={loading}
-        error={error}
+    <div style={{ overflowX: 'auto', padding: '20px' }}>
+      <table
+        style={{
+          borderCollapse: 'collapse',
+          width: '100%',
+          fontFamily: 'Arial, sans-serif',
+          fontSize: '14px',
+          textAlign: 'center',
+          boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+        }}
       >
-        {/* Attendance Table */}
-        {attendanceData.length > 0 && (
-          <div className="overflow-x-auto mt-4">
-            <table className="w-full border-collapse border border-gray-300">
-              <thead>
-                <tr className="bg-blue-600 text-white">
-                  <th className="p-2 border border-gray-300" rowSpan="2">
-                    PRN
-                  </th>
-                  <th className="p-2 border border-gray-300" rowSpan="2">
-                    Name
-                  </th>
-                  <th className="p-2 border border-gray-300" rowSpan="2">
-                    Batch
-                  </th>
-                  <th
-                    className="p-2 border border-gray-300"
-                    colSpan={Object.keys(attendanceData[0].subjects).length}
-                  >
-                    Subjects
-                  </th>
-                </tr>
-                <tr className="bg-blue-600 text-white">
-  {Object.entries(attendanceData[0].subjects).map(([subjectCode, subjectData]) => (
-    <th
-      key={subjectCode}
-      className="p-2 border border-gray-300 text-center font-semibold"
-    >
-      {subjectCode} <br />
-      <span className="text-sm font-normal">({subjectData.type})</span>
-    </th>
-  ))}
-</tr>
+        <thead>
+          <tr style={{ backgroundColor: '#007BFF', color: '#FFFFFF' }}>
+            <th style={{ padding: '10px' }}>Name</th>
+            <th style={{ padding: '10px' }}>PRN</th>
+            {dates.map((date, index) => (
+              <th key={index} style={{ padding: '10px' }}>
+                {date}
+              </th>
+            ))}
+            <th style={{ padding: '10px' }}>Out of</th>
+            <th style={{ padding: '10px' }}>Student %</th>
+            
+          </tr>
+        </thead>
+        <tbody>
+          {students.map((student) => {
+            // Calculate student percentage
+            const studentPercentage = (
+              (student.cumulativeAttendance / dates.length) *
+              100
+            ).toFixed(2);
 
-              </thead>
-              <tbody>
-                {attendanceData.map((student, index) => (
-                  <tr key={index} className="text-center odd:bg-gray-100 even:bg-gray-200">
-                    <td className="p-2 border border-gray-300">{student.prn}</td>
-                    <td className="p-2 border border-gray-300">{student.name}</td>
-                    <td className="p-2 border border-gray-300">{student.batch}</td>
-                    {Object.entries(student.subjects).map(([subjectCode, subjectData]) => {
-                      const attendedCount = subjectData.attendance.filter((status) => status === 1).length;
-                      const attendancePercentage = (attendedCount / subjectData.attendance.length) * 100;
+            return (
+              <tr key={student.prn} style={{ backgroundColor: '#F9F9F9', color: 'black' }}>
+                <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>
+                  {student.name}
+                </td>
+                <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>
+                  {student.prn}
+                </td>
+                {attendanceRows.map((row, index) => {
+                  const studentAttendance = row.students.find(
+                    (s) => s.prn === student.prn
+                  )?.attendance;
 
-                      return (
-                        <td key={subjectCode} className={`-2 border border-gray-300 text-center ${attendancePercentage < 75 ? 'bg-[#F2DEDD] text-red' : 'bg-[#DFEFD8] text-green'}`}>
-                          {attendancePercentage.toFixed(2)}%
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                  const prevAttendance =
+                    index > 0
+                      ? attendanceRows[index - 1].students.find(
+                          (s) => s.prn === student.prn
+                        )?.attendance || 0
+                      : 0;
 
-        {/* Loading Indicator */}
-        {loading && <p className="text-blue-500 text-center">Loading attendance data...</p>}
+                  return (
+                    <td
+                      key={index}
+                      style={{
+                        padding: '10px',
+                        borderBottom: '1px solid #ddd',
+                        backgroundColor:
+                          studentAttendance === prevAttendance
+                            ? '#F2DEDE'
+                            : '#DFF0D8',
+                        color: studentAttendance === prevAttendance ? '#A94442' : '#3C763D',
+                      }}
+                    >
+                      {studentAttendance || 0}
+                    </td>
+                  );
+                })}
+               
+                <td
+                  style={{
+                    padding: '10px',
+                    borderBottom: '1px solid #ddd',
+                  }}
+                >
+                  {student.cumulativeAttendance} / {dates.length}
+                    </td>
+                     <td
+                  style={{
+                    padding: '10px',
+                    borderBottom: '1px solid #ddd',
+                    fontWeight: 'bold',
+                    color: studentPercentage >= 75 ? '#3C763D' : '#A94442',
+                  }}
+                >
+                  {studentPercentage}%
+                </td>
+              </tr>
+            );
+          })}
+          {/* Add lecture percentage row */}
+          <tr style={{ backgroundColor: '#E9ECEF', fontWeight: 'bold' }}>
+            <td
+              colSpan="2"
+              style={{
+                padding: '10px',
+                borderBottom: '1px solid #ddd',
+                textAlign: 'right',
+                color: 'black',
+              }}
+            >
+              Lecture %
+            </td>
+            {attendanceRows.map((row, index) => (
+              <td
+                key={index}
+                style={{
+                  padding: '10px',
+                  borderBottom: '1px solid #ddd',
+                  fontWeight: 'bold',
+                  backgroundColor: '#FFF3CD',
+                  color: '#856404',
+                }}
+              >
+                {row.lecturePercentage}%
+              </td>
+            ))}
+            <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}></td>
+            <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}></td>
+          </tr>
+        </tbody>
+          </table>
+          <div style={{ marginTop: '20px', textAlign: 'center' }}>
+  <button
+    onClick={exportToCSV}
+    style={{
+      padding: '10px 20px',
+      margin: '10px',
+      backgroundColor: '#007BFF',
+      color: '#FFF',
+      border: 'none',
+      borderRadius: '5px',
+      cursor: 'pointer',
+    }}
+  >
+    Export to CSV
+  </button>
+  
+</div>
 
-        {/* Error Message */}
-        {error && <p className="text-red-500 text-center">{error}</p>}
-      </DropdownPage>
     </div>
   );
 };
 
-export default AttendancePage;
+export default AttendanceTable;

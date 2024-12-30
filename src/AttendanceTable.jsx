@@ -1,38 +1,7 @@
 import React, { useEffect, useState } from "react";
 import fetchAttendanceData from "./api/fetchAttendanceData";
 
-const AttendanceTable = ({data}) => {
-  // const [data, setData] = useState(null);
-
-  // Fetch attendance data
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const semester = 5;
-  //       const subjectId = "CS501";
-  //       const branch = "CS";
-  //       const division = "A";
-  //       const batch = "01";
-
-  //       // Replace `fetchAttendanceData` with the actual API call or function
-  //       const response = await fetchAttendanceData(
-  //         semester,
-  //         subjectId,
-  //         branch,
-  //         division,
-  //         batch
-  //       );
-
-  //       console.log("Attendance Data:", response);
-  //       setData(response);
-  //     } catch (error) {
-  //       console.error("Error fetching attendance data:", error);
-  //     }
-  //   };
-
-  //   fetchData();
-  // }, []);
-
+const AttendanceTable = ({ data }) => {
   if (!data || !data.attendance || data.attendance.length === 0) {
     return <div>No data available</div>;
   }
@@ -79,22 +48,21 @@ const AttendanceTable = ({data}) => {
     const attendanceRows = [];
     const totalStudents = data.attendance[0]?.students.length || 0;
 
+    // Initialize student data
     data.attendance[0]?.students.forEach((student) => {
       students[student.prn] = {
         name: student.name,
         prn: student.prn,
         cumulativeAttendance: 0,
+        previousAttendance: 0, // Track previous attendance for coloring logic
       };
     });
 
+    // Process attendance data
     data.attendance.forEach((record) => {
       const date = new Date(record.date).toLocaleDateString();
       const studentData = record.students;
       if (date) dates.push(date);
-
-      studentData.forEach((student) => {
-        students[student.prn].cumulativeAttendance += student.attendance;
-      });
 
       const presentCount = studentData.filter(
         (student) => student.attendance === 1
@@ -105,10 +73,16 @@ const AttendanceTable = ({data}) => {
 
       attendanceRows.push({
         date,
-        students: studentData.map((s) => ({
-          prn: s.prn,
-          attendance: s.attendance, // Keep specific daily attendance
-        })),
+        students: studentData.map((s) => {
+          const prevAttendance = students[s.prn].cumulativeAttendance;
+          students[s.prn].cumulativeAttendance += s.attendance;
+
+          return {
+            prn: s.prn,
+            attendance: students[s.prn].cumulativeAttendance,
+            previousAttendance: prevAttendance, // Store previous attendance for comparison
+          };
+        }),
         lecturePercentage,
       });
     });
@@ -120,7 +94,6 @@ const AttendanceTable = ({data}) => {
 
   return (
     <div style={{ overflowX: "auto", padding: "20px" }}>
-      
       <table
         style={{
           borderCollapse: "collapse",
@@ -147,12 +120,14 @@ const AttendanceTable = ({data}) => {
         <tbody>
           {students.map((student) => {
             const studentPercentage = (
-              (student.cumulativeAttendance / dates.length) *
-              100
+              (student.cumulativeAttendance / dates.length) * 100
             ).toFixed(2);
 
             return (
-              <tr key={student.prn} style={{ backgroundColor: "#F9F9F9" }}>
+              <tr
+                key={student.prn}
+                style={{ backgroundColor: "#F9F9F9" }}
+              >
                 <td style={{ padding: "10px", borderBottom: "1px solid #ddd" }}>
                   {student.name}
                 </td>
@@ -162,7 +137,11 @@ const AttendanceTable = ({data}) => {
                 {attendanceRows.map((row, index) => {
                   const studentAttendance = row.students.find(
                     (s) => s.prn === student.prn
-                  )?.attendance;
+                  );
+
+                  const isAbsent =
+                    studentAttendance.attendance ===
+                    studentAttendance.previousAttendance;
 
                   return (
                     <td
@@ -170,12 +149,11 @@ const AttendanceTable = ({data}) => {
                       style={{
                         padding: "10px",
                         borderBottom: "1px solid #ddd",
-                        backgroundColor:
-                          studentAttendance === 1 ? "#DFF0D8" : "#F2DEDE",
-                        color: studentAttendance === 1 ? "#3C763D" : "#A94442",
+                        backgroundColor: isAbsent ? "#F2DEDE" : "#DFF0D8",
+                        color: isAbsent ? "#A94442" : "#3C763D",
                       }}
                     >
-                      {studentAttendance || 0}
+                      {studentAttendance.attendance}
                     </td>
                   );
                 })}

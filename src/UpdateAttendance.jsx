@@ -10,18 +10,46 @@ const UpdateAttendance = ({ data }) => {
   // Get current date on component mount in dd/MM/yyyy format
   useEffect(() => {
     const date = new Date();
-    const formattedDate = `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
-    setTodaysDate(formattedDate);
+    const formattedDate = date.toISOString().split("T")[0]; // ISO format
+  setTodaysDate(formattedDate);
+
+    
   }, []);
 
   // Function to convert date from yyyy-mm-dd to dd/mm/yyyy
-  const formatDate = (dateString) => {
+  const formatDate = (isoDateString) =>
+  {
+    
+  const [year, month, day] = isoDateString.split("-");
+  return `${day}/${month}/${year}`;
+};
+
+  const convertToDDMMYYYY = (dateString) => {
+  try {
+    // Parse the date string into a JavaScript Date object
     const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
+
+    if (isNaN(date)) {
+      throw new Error("Invalid date string");
+    }
+
+    // Extract day, month, and year
+    const day = String(date.getUTCDate()).padStart(2, '0'); // Day (UTC)
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0'); // Month (0-based, so +1)
+    const year = date.getUTCFullYear(); // Year
+
+    // Return formatted date as dd/mm/yyyy
     return `${day}/${month}/${year}`;
-  };
+  } catch (error) {
+    console.error("Error converting date:", error.message);
+    return "Invalid Date";
+  }
+};
+
+
+
+
+
 
   // Handle checkbox change
   const handleCheckboxChange = (date, prn, isChecked) => {
@@ -65,9 +93,9 @@ const UpdateAttendance = ({ data }) => {
   // Add new session with a user-selected date
   const addSession = () => {
     if (newSessionDate) {
-      const formattedDate = formatDate(newSessionDate); // Format the selected date
+      // const formattedDate = formatDate(newSessionDate); // Format the selected date
       const newSession = {
-        date: formattedDate, // Use the formatted date
+        date: newSessionDate, // Use the formatted date
         sem_id: attendanceData[0].sem_id, // Use sem_id from existing data
         students: attendanceData[0].students.map((student) => ({
           ...student,
@@ -90,9 +118,10 @@ const UpdateAttendance = ({ data }) => {
 
   // Sort data based on the date in ascending order
   const sortedData = [...attendanceData, ...newSessions].sort((a, b) => {
-    const dateA = new Date(a.date).toISOString();
-    const dateB = new Date(b.date).toISOString();
-    return dateA < dateB ? -1 : dateA > dateB ? 1 : 0;
+    const dateA = new Date(a.date);
+const dateB = new Date(b.date);
+return dateA - dateB;
+
   });
 
   return (
@@ -106,7 +135,7 @@ const UpdateAttendance = ({ data }) => {
           value={newSessionDate}
           style={{ marginLeft: '10px' }}
         />
-        {newSessionDate}
+        {}
         <button
           onClick={addSession}
           style={{ marginLeft: '10px', padding: '8px 16px', backgroundColor: '#007BFF', color: 'white' }}
@@ -131,7 +160,7 @@ const UpdateAttendance = ({ data }) => {
             <th style={{ padding: '10px' }}>PRN</th>
             {sortedData.map((attendanceRecord, index) => (
               <th key={index} style={{ padding: '10px' }}>
-                {formatDate(attendanceRecord.date)}
+                {convertToDDMMYYYY(attendanceRecord.date)}
               </th>
             ))}
           </tr>

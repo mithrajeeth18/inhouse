@@ -65,7 +65,8 @@ const UpdateAttendance = ({ data }) => {
   // Add new session with a user-selected date
   const addSession = () => {
     if (newSessionDate) {
-      const formattedDate = formatDate(newSessionDate); // Format the selected date
+      const formattedDate = formatDate(newSessionDate);
+       // Format the selected date
       const newSession = {
         attendance: [
           {
@@ -109,6 +110,7 @@ const UpdateAttendance = ({ data }) => {
           value={newSessionDate}
           style={{ marginLeft: '10px' }}
         />
+        {formatDate(newSessionDate)}
         <button
           onClick={addSession}
           style={{ marginLeft: '10px', padding: '8px 16px', backgroundColor: '#007BFF', color: 'white' }}
