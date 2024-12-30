@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 const UpdateAttendance = ({ data }) => {
-  const [attendanceData, setAttendanceData] = useState(data); // Original data
+  const [attendanceData, setAttendanceData] = useState(data.attendance); // Original data
   const [newSessions, setNewSessions] = useState([]); // Newly added sessions
   const [isUpdated, setIsUpdated] = useState(false); // Track if data has been updated
   const [todaysDate, setTodaysDate] = useState(""); // Today's date
@@ -26,8 +26,8 @@ const UpdateAttendance = ({ data }) => {
   // Handle checkbox change
   const handleCheckboxChange = (date, prn, isChecked) => {
     const updatedData = attendanceData.map((attendanceRecord) => {
-      if (attendanceRecord.attendance[0].date === date) {
-        const updatedStudents = attendanceRecord.attendance[0].students.map((student) => {
+      if (attendanceRecord.date === date) {
+        const updatedStudents = attendanceRecord.students.map((student) => {
           if (student.prn === prn) {
             return { ...student, attendance: isChecked ? 1 : 0 };
           }
@@ -35,15 +35,15 @@ const UpdateAttendance = ({ data }) => {
         });
         return {
           ...attendanceRecord,
-          attendance: [{ ...attendanceRecord.attendance[0], students: updatedStudents }],
+          students: updatedStudents,
         };
       }
       return attendanceRecord;
     });
 
     const updatedNewSessions = newSessions.map((session) => {
-      if (session.attendance[0].date === date) {
-        const updatedStudents = session.attendance[0].students.map((student) => {
+      if (session.date === date) {
+        const updatedStudents = session.students.map((student) => {
           if (student.prn === prn) {
             return { ...student, attendance: isChecked ? 1 : 0 };
           }
@@ -51,7 +51,7 @@ const UpdateAttendance = ({ data }) => {
         });
         return {
           ...session,
-          attendance: [{ ...session.attendance[0], students: updatedStudents }],
+          students: updatedStudents,
         };
       }
       return session;
@@ -67,16 +67,12 @@ const UpdateAttendance = ({ data }) => {
     if (newSessionDate) {
       const formattedDate = formatDate(newSessionDate); // Format the selected date
       const newSession = {
-        attendance: [
-          {
-            date: formattedDate, // Use the formatted date
-            semId: 'SEM123',
-            students: attendanceData[0].attendance[0].students.map((student) => ({
-              ...student,
-              attendance: 1, // Set default attendance to 1 (present)
-            })),
-          },
-        ],
+        date: formattedDate, // Use the formatted date
+        sem_id: attendanceData[0].sem_id, // Use sem_id from existing data
+        students: attendanceData[0].students.map((student) => ({
+          ...student,
+          attendance: 1, // Set default attendance to 1 (present)
+        })),
       };
       setNewSessions([...newSessions, newSession]);
       setIsUpdated(false);
@@ -94,8 +90,8 @@ const UpdateAttendance = ({ data }) => {
 
   // Sort data based on the date in ascending order
   const sortedData = [...attendanceData, ...newSessions].sort((a, b) => {
-    const dateA = a.attendance[0].date.split('/').reverse().join('');
-    const dateB = b.attendance[0].date.split('/').reverse().join('');
+    const dateA = new Date(a.date).toISOString();
+    const dateB = new Date(b.date).toISOString();
     return dateA < dateB ? -1 : dateA > dateB ? 1 : 0;
   });
 
@@ -133,13 +129,13 @@ const UpdateAttendance = ({ data }) => {
             <th style={{ padding: '10px' }}>PRN</th>
             {sortedData.map((attendanceRecord, index) => (
               <th key={index} style={{ padding: '10px' }}>
-                {attendanceRecord.attendance[0].date}
+                {formatDate(attendanceRecord.date)}
               </th>
             ))}
           </tr>
         </thead>
         <tbody>
-          {attendanceData[0]?.attendance[0]?.students.map((student) => (
+          {attendanceData[0]?.students.map((student) => (
             <tr key={student.prn} style={{ backgroundColor: '#F9F9F9', color: 'black' }}>
               <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>
                 {student.name}
@@ -149,19 +145,19 @@ const UpdateAttendance = ({ data }) => {
               </td>
 
               {sortedData.map((attendanceRecord, index) => {
-                const studentAttendance = attendanceRecord.attendance[0].students.find(
+                const studentAttendance = attendanceRecord.students.find(
                   (s) => s.prn === student.prn
                 )?.attendance;
 
                 return (
                   <td key={index} style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>
-                    {newSessions.some((session) => session.attendance[0].date === attendanceRecord.attendance[0].date) ? (
+                    {newSessions.some((session) => session.date === attendanceRecord.date) ? (
                       <input
                         type="checkbox"
                         checked={studentAttendance === 1}
                         onChange={(e) =>
                           handleCheckboxChange(
-                            attendanceRecord.attendance[0].date,
+                            attendanceRecord.date,
                             student.prn,
                             e.target.checked
                           )

@@ -1,5 +1,5 @@
 import AttendanceTable from "./AttendanceTable";
-import DynamicDropdowns from "./dummydropdown";
+import DynamicDropdowns from "./DynamicDropdowns";
 import UpdateAttendance from "./UpdateAttendance";
 import FacultyPage from "./Facultypage";
 import fetchAttendanceData from "./api/fetchAttendanceData";
@@ -9,7 +9,9 @@ import { useState } from "react";
 function App() {
   const [selectedValues, setSelectedValues] = useState({});
 
-  const handleSelectionChange = (values) => {
+  const handleSelectionChange = (values) =>
+  {
+    console.log("Selected Values:", values);
     setSelectedValues(values);
   };
   const data2 = {
@@ -199,14 +201,15 @@ function App() {
     <>
       <div>
         {/* <AttendanceTable data={data}  /> */}
-        {/* <DropDown data={data2}/> */}
+        {/* <DynamicDropdowns data={data3} onSelectionChange={handleSelectionChange}/> */}
 
         <FacultyPage />
         {/* <UpdateAttendance data={data}/> */}
         {/* <DynamicDropdowns
-          data={data3}
+          data={data2}
           onSelectionChange={handleSelectionChange}
         /> */}
+        {/* <UpdateAttendance data={data1}/> */}
       </div>
     </>
   );

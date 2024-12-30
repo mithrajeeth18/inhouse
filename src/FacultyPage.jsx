@@ -9,6 +9,8 @@ import axios from "axios";
 import fetchAttendanceData from "./api/fetchAttendanceData";
 const FacultyPage = () => {
   const [attendance, setAttendance] = useState(null);
+  const [reportORUpdate, setReportORUpdaate] = useState(true);
+  const [buttonName, setButtonName] = useState(null);
  
   const [criteria, setCriteria] = useState(null);
    const [selectedValues, setSelectedValues] = useState({});
@@ -58,9 +60,18 @@ const FacultyPage = () => {
     };
 
     fetchCriteria();
+   
   }, []);
+  useEffect(() =>
+  {
+    
+  },[reportORUpdate])
 
-  
+  const handelUpdareORreport = () =>
+  {
+    if (reportORUpdate) setReportORUpdaate(false);
+    else setReportORUpdaate(true);
+}
 
   // Handle rendering based on loading/error state
   
@@ -79,26 +90,47 @@ const FacultyPage = () => {
       <div className="content">
         <div className="component-container">
           {/* Render dropdowns only if criteria data exists */}
+          
           {criteria ? (
             <DynamicDropdowns data={criteria} onSelectionChange={handleSelectionChange} />
           ) : (
             <div>No criteria data available</div>
           )}
 
-          {/* Button to fetch attendance data */}
+          
+          <div>
           <button
             className="bg-green-200 p-2 rounded-la"
             onClick={fetchData}
           >
             Fetch Attendance
-          </button>
+            </button>
+           
 
-          {/* Render attendance table only if attendance data exists */}
-          {attendance?  (
-            <AttendanceTable data={attendance} />
+          {/* Conditionally render based on reportORUpdate */}
+          {reportORUpdate ? (
+            // Show Attendance Table if reportORUpdate is true
+              attendance ? (
+                <div>
+                <AttendanceTable data={attendance} />
+                  <button onClick={handelUpdareORreport}>update table</button>
+                  </div>
+            ) : (
+                  <div>No attendance data available</div>
+                  
+            )
           ) : (
-            <div>No attendance data available</div>
+                // Show UpdateAttendance if reportORUpdate is false
+                attendance ? (
+                  <div>
+                  <UpdateAttendance data={attendance} />
+                   <button onClick={handelUpdareORreport}>See report</button>
+                  </div>
+            ) : (
+              <div>No attendance data available</div>
+            )
           )}
+            </div>
         </div>
       </div>
     </div>
